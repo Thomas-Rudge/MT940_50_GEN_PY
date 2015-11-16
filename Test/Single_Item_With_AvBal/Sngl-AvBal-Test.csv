@@ -1,0 +1,11 @@
+Sender BIC,Receiver BIC,Account ID,Stmt No,Stmt Pg,OpBalSign,OpBalType,OpBalDate,Opening Balance,Value Date,Entry Date,D/C,Amount,Trancode,Ref1,Ref2,Ref3,ClBalSign,ClBalType,ClBalDate,Closing Balance,AvBalSign,AvBalDate,Closing Available Balance,CCY,Ref4 (MT940 Only),TRN
+TEST12A,BANK21KN,KEN000123ABC,1,1,C,F,01-11-2015,0,01-11-2015,01-11-2015,C,100,S111,Test123,123TEST,!@#$%^,C,F,01-11-2015,100,C,01-11-2015,1100,KES,S111 Kenyan Shilling Account,9202485710032814
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,,,,,,,,
