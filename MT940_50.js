@@ -28,6 +28,7 @@ var paddify = function(padText, padChar, padLength, padDirection) {
 var todaysDate = function() {
    var dateObject = new Date();
    var dateString = '';
+   
    dateString += String(dateObject.getFullYear()).slice(2);
    dateString += paddify(String(dateObject.getMonth() + 1), '0', 2, 'r');
    dateString += paddify(String(dateObject.getDate()), '0', 2, 'r');
@@ -46,12 +47,12 @@ var csvParser = function(csvData) {
    var lines = [];     // A list of lines and their cell values as an array, for use later
    var dq = 0;         // A count of double quotes when assessing a cell's value
    
-   var i;
-   for (i = 0; i < csvData.length; i++) {             // Iterate over every line in the document (csvData array)
+   for (var i = 0; i < csvData.length; i++) {             // Iterate over every line in the document (csvData array)
       for (var c of csvData[i]) {                     // Iterate over every character in the line
          if (c === '"') {                                // If a double quote add it to the count
             dq += 1;
          }
+         
          if (c === ',') {                                // If a comma...
             if (dq === 0 || dq%2 === 0) {                // If the quote count is 0 or even the cell value is complete
                if (cellValue.startsWith('"') && cellValue.endsWith('"')) {
@@ -65,6 +66,7 @@ var csvParser = function(csvData) {
          }
          cellValue += c;                                 // In all other cases add character to cell value string
       }
+      
       if (cellValue.startsWith('"') && cellValue.endsWith('"')) {
          cellValue = cellValue.slice(1, -1)
       }
@@ -83,8 +85,8 @@ var csvParser = function(csvData) {
 // This function takes a specific array and convert the data to its swift equivalent
 var convertValues = function(xline, dtf) {
    var inScope = [5, 6, 11, 17, 18, 21];
-   var i;
-   for (i = 0; i < xline.length; i++) {
+   
+   for (var i = 0; i < xline.length; i++) {
       switch(i) {
          case 5:  // Opening Balance Sign
          case 6:  // Opening Balance Type
@@ -149,10 +151,11 @@ var genMt9 = function(activeFile, config) {
    // present and set to MT940 if so. Else strip the MT prefix from the type.
    if (config['msgTyp'] === 'Auto') {
       var tmp = 0;
-      var i;
-      for (i = 0; i < activeFile.length; i++) {
+      
+      for (var i = 0; i < activeFile.length; i++) {
          tmp += activeFile[i][25].length;
       }
+      
       if (tmp > 0) {
          config['msgTyp'] = '940';
       } else {
@@ -183,10 +186,8 @@ var genMt9 = function(activeFile, config) {
    var lastLine = null;      // Used to keep track of last line processed
    var outputString = '';    // Where the cumulated swift data will be written to
    var today = todaysDate(); // Today's date in YYMMDD format
-   console.log('Today:' + today)
    
-   var i;
-   for (i = 0; i < activeFile.length; i++) {
+   for (var i = 0; i < activeFile.length; i++) {
       var zline = ''; // This string that will be appended to outputString
       // Check the number of columns is correct
       if (activeFile[i].length !== 27) {
@@ -305,9 +306,8 @@ use the output of this program at your own risk.")
    // Get the setting values and convert them into an object (dictionary)
    var eleVals = document.getElementsByName("genops");
    var genOps = [];
-   var i;
    
-   for (i = 0; i < eleVals.length; i++) {
+   for (var i = 0; i < eleVals.length; i++) {
       genOps.push(eleVals[i].value);
    }
    // Full details of swift header block structure can be found here...
@@ -341,6 +341,7 @@ use the output of this program at your own risk.")
    } 
    // The user input
    var inputs = document.getElementById("swift_input").value;
+   
    if (inputs !== '' && 
        inputs.indexOf('CSV data should be pasted in here.') === -1 && 
        inputs.includes(',')) {
