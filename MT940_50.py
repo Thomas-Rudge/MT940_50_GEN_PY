@@ -9,7 +9,7 @@
 # Copyright:   (c) Thomas Edward Rudge 2015
 # Licence:     GPL
 #-------------------------------------------------------------------------------
-# Written for Python 3 (3.3)
+# Written for Python 3
 
 import csv, datetime
 
@@ -125,10 +125,10 @@ def gen_mt9(active_file, msg_type, target_file, dtf='DDMMYYYY',
                         ## Auto generate mir
                         mir = str(datetime.datetime.today()).replace('-', '')[2:8] + line[0].ljust(12, 'X') + session_no + seqno
                     zline += '{2:O' + msg_type + inp_time + mir + out_date + out_time + msg_prty + '}'
-                f113_ = '' if f113 is False else '{113:'+f113+'}' ## Create field 113 if present
+                f113_ = '' if f113 is False else '{113:'+str(f113).rjust(4, '0') + '}' ## Create field 113 if present
                 zline += '{3:' + f113_ + '{118:' + mur + '}{4:\n'
 
-            ## Check to see whether a new message should be opened.
+            ## Check to see whether a new page should be opened.
             if prev_line['stmtpg'] != line[4] or prev_line['account'] != line[2]:
                 if line[26] == '' or line[26].isspace():
                     zline += ':20:MT94050GEN' + str(trn).rjust(6,'0') + '\n'
