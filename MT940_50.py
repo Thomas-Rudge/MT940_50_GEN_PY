@@ -187,32 +187,22 @@ def convert_values(xline, dtf_):
     '''
     Converts supplied values to swift MT equivalents.
     '''
-    # Upper case Types and Signs.
-    xline[5], xline[6], xline[11]   = xline[5].upper(), xline[6].upper(), xline[11].upper()
-    xline[17], xline[18], xline[21] = xline[17].upper(), xline[18].upper(), xline[21].upper()
-    # All amounts, remove thousands seps, and replace decimal spot with comma
-    xline[8]  = xline[8].replace(',', '').replace('.', ',').replace('-', '')  # Open Bal
-    xline[12] = xline[12].replace(',', '').replace('.', ',').replace('-', '') # Item Amount
-    xline[20] = xline[20].replace(',', '').replace('.', ',').replace('-', '') # Close Bal
-    xline[23] = xline[23].replace(',', '').replace('.', ',').replace('-', '') # Avail Bal
-    # Convert dates to YYMMDD or MMDD
-    if dtf_ == 'DDMMYYYY':
-        xline[7]  = xline[7][8:10] + xline[7][3:5] + xline[7][:2]    # Open Bal Date
-        xline[9]  = xline[9][8:10] + xline[9][3:5] + xline[9][:2]    # Item Value Date
-        xline[10] = xline[10][3:5] + xline[10][:2]                   # Item Entry Date
-        xline[19] = xline[19][8:10] + xline[19][3:5] + xline[19][:2] # Close Bal Date
-        xline[22] = xline[22][8:10] + xline[22][3:5] + xline[22][:2] # Avail Bal Date
-    elif dtf_ == 'MMDDYYYY':
-        xline[7]  = xline[7][8:10] + xline[7][:2] + xline[7][3:5]    # Open Bal Date
-        xline[9]  = xline[9][8:10] + xline[9][:2] + xline[9][3:5]    # Item Value Date
-        xline[10] = xline[10][:2] + xline[10][3:5]                   # Item Entry Date
-        xline[19] = xline[19][8:10] + xline[19][:2] + xline[19][3:5] # Close Bal Date
-        xline[22] = xline[22][8:10] + xline[22][:2] + xline[22][3:5] # Avail Bal Date
-    else: # YYYYMMDD
-        xline[7]  = xline[7][2:4] + xline[7][5:7] + xline[7][8:10]   # Open Bal Date
-        xline[9]  = xline[9][2:4] + xline[9][5:7] + xline[9][8:10]   # Item Value Date
-        xline[10] = xline[10][5:7] + xline[10][8:10]                 # Item Entry Date
-        xline[19] = xline[19][2:4] + xline[19][5:7] + xline[19][8:10]# Close Bal Date
-        xline[22] = xline[22][2:4] + xline[22][5:7] + xline[22][8:10]# Avail Bal Date
+    for i, item in enumerate(xline):
+        if i in [5, 6, 11, 17, 18 ,21]:
+            # Upper case Types and Signs.
+            xline[i] = item.upper()
+        elif i in [8, 12, 20, 23]:
+            # All amounts, remove thousands seps, and replace decimal spot with comma
+            xline[i] = item.replace(',', '').replace('.', ',').replace('-', '')
+        # Convert dates to YYMMDD or MMDD
+        elif i in [7, 9, 10, 19, 22]:
+            if dtf == 'DDMMYYYY':
+                xline[i] = item[8:10] + item[3:5] + item[:2] if i != 10 else item[3:5] + item[:2]
+            elif dtf == 'MMDDYYYY':
+                xline[i] = item[8:10] + item[:2] + item[3:5] if i != 10 else item[:2] + item[3:5]
+            else:
+                xline[i] = item[2:4] + item[5:7] + item[8:10] if i != 10 else item[5:7] + item[8:10]
+        else:
+            continue
 
     return(xline)
