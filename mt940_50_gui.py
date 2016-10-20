@@ -33,26 +33,27 @@ def okwindow(txt, wdth, hght, title, screensizet):
     def gogo(event=None):
         okwin.destroy()
 
-    wlxym = '+' + str(screensizet[0] // 2 - wdth // 2) + '+' + str(screensizet[1] // 2 - hght // 2)
+    wlxym = '+%s+%s' % (str(screensizet[0] // 2 - wdth // 2), 
+                        str(screensizet[1] // 2 - hght // 2))
 
     okwin = tkinter.Tk()
 
-    lblfrm = tkinter.LabelFrame(okwin, width = wdth, height = hght, bg = bgclr)
+    lblfrm = tkinter.LabelFrame(okwin, width=wdth, height=hght, bg=bgclr)
     lblfrm.grid(row=0, column=0, sticky='nesw')
     lblfrm.grid_propagate(False)
 
     lbl = tkinter.Label(lblfrm, text=txt, bg=bgclr, justify='center', wraplength=wdth - 20)
     lbl.grid(row=0, column=0, pady=10)
 
-    okbut = tkinter.Button(lblfrm, text='Ok', command=gogo, activebackground='#00CDFA', relief=winrlf,
-                           width=6, bg='#f0f0f0')
+    okbut = tkinter.Button(lblfrm, text='Ok', command=gogo, activebackground='#00CDFA', 
+                           relief=winrlf, width=6, bg='#f0f0f0')
     okbut.grid(row=1, column=0, sticky='s', pady=4)
 
     lblfrm.grid_columnconfigure(0, weight=1)
     lblfrm.grid_rowconfigure(0, weight=1)
     lblfrm.grid_rowconfigure(1, weight=1)
 
-    okwin.geometry(str(wdth) + 'x' + str(hght) + wlxym)
+    okwin.geometry('%sx%s%s' % (str(wdth), str(hght), wlxym))
     okwin.config(bg=bgclr)
     okwin.title(title)
     okwin.bind('<Return>', gogo)
@@ -87,7 +88,8 @@ def confirmwin(txt, b1, b2, b3, title, screensizet):
     def nogo(event=None):
         confwin.destroy()
 
-    wlxym = '+' + str(screensizet[0] // 2 - conf_size[0] // 2) + '+' + str(screensizet[1] // 2 - conf_size[1] // 2)
+    wlxym = '+%s+%s' % (str(screensizet[0] // 2 - conf_size[0] // 2), 
+                        str(screensizet[1] // 2 - conf_size[1] // 2))
 
     lblfrm = tkinter.LabelFrame(confwin, width=conf_size[0], height=conf_size[1], bg=bgclr)
     lblfrm.grid(row=0, column=0, sticky='nesw')
@@ -96,16 +98,16 @@ def confirmwin(txt, b1, b2, b3, title, screensizet):
     lbl = tkinter.Label(lblfrm, text=txt, bg=bgclr, justify='center', wraplength=conf_size[0] - 20)
     lbl.grid(row=0, column=0, sticky='nesw', columnspan=3, padx=10, pady=10)
 
-    btn1 = tkinter.Button(lblfrm, text=b1, command=gogo1, activebackground=actvclr, relief=winrlf,
-                          width=len(b1) + 2, bg=btnclr2)
+    btn1 = tkinter.Button(lblfrm, text=b1, command=gogo1, activebackground=actvclr, 
+                          relief=winrlf, width=len(b1) + 2, bg=btnclr2)
     btn1.grid(row=1, column=0, sticky='s', pady=15)
 
-    btn2 = tkinter.Button(lblfrm, text=b2, command=gogo2, activebackground=actvclr, relief=winrlf,
-                          width=len(b2) + 2, bg=btnclr2)
+    btn2 = tkinter.Button(lblfrm, text=b2, command=gogo2, activebackground=actvclr, 
+                          relief=winrlf, width=len(b2) + 2, bg=btnclr2)
     btn2.grid(row=1, column=1, sticky='s', pady=15)
 
-    btn3 = tkinter.Button(lblfrm, text=b3, command=gogo3, activebackground=actvclr, relief=winrlf,
-                          width=len(b3) + 2, bg=btnclr)
+    btn3 = tkinter.Button(lblfrm, text=b3, command=gogo3, activebackground=actvclr, 
+                          relief=winrlf, width=len(b3) + 2, bg=btnclr)
     btn3.grid(row=1, column=2, sticky='s', pady=15)
 
     lblfrm.grid_columnconfigure(0, weight=1)
@@ -113,7 +115,7 @@ def confirmwin(txt, b1, b2, b3, title, screensizet):
     lblfrm.grid_columnconfigure(2, weight=1)
     lblfrm.grid_rowconfigure(1, weight=1)
 
-    confwin.geometry(str(conf_size[0]) + 'x' + str(conf_size[1]) + wlxym)
+    confwin.geometry('%sx%s%s' % (str(conf_size[0]), str(conf_size[1]), wlxym))
     confwin.config(bg=bgclr)
     confwin.title(title)
     confwin.protocol("WM_DELETE_WINDOW", nogo)
@@ -416,8 +418,10 @@ def settings_window(screensizes):
     setwin.title('Settings Window')
     setwin.protocol("WM_DELETE_WINDOW", exit_settings)
     setwin.iconbitmap(icon)
-    wlxym = '+' + str(screensizes[0] // 2 - 315) + '+' + str(screensizes[1] // 2 - 280)
-    setwin.geometry('630x560' + wlxym)
+    
+    wlxym = '+%s+%s' % (str(screensizes[0] // 2 - 315), str(screensizes[1] // 2 - 280))
+    
+    setwin.geometry('630x560%s' % wlxym)
 
     setwin.mainloop()
 
@@ -483,7 +487,8 @@ def main(event=None):
 
     mt = 'Settings'
     while mt == 'Settings':
-        mt = confirmwin('\nPlease select desired output format.', 'MT940', 'MT950', 'Settings', 'Confirm', screensize)
+        mt = confirmwin('\nPlease select desired output format.', 
+                        'MT940', 'MT950', 'Settings', 'Confirm', screensize)
         if mt == 'Settings':
             settings_window(screensize)
 
@@ -515,10 +520,12 @@ def main(event=None):
     stgs = get_settings()
 
     if stgs:
-        mt940_50.gen_mt9(active_f, mt, target_f, dtf=stgs['dtf'], appid=stgs['appid'], servid=stgs['servid'],
-                        session_no=stgs['session_no'], seqno=stgs['seqno'], drctn=stgs['drctn'], msg_prty=stgs['msg_prty'],
-                        dlvt_mnty=stgs['dlvt_mnty'], obs=stgs['obs'], inp_time=stgs['inp_time'], out_date=stgs['out_date'],
-                        out_time=stgs['out_time'], mir=stgs['mir'], f113=stgs['f113'], mur=stgs['mur'], chk=stgs['chk'])
+        mt940_50.gen_mt9(active_f, mt, target_f, dtf=stgs['dtf'], appid=stgs['appid'], 
+                         servid=stgs['servid'], session_no=stgs['session_no'], seqno=stgs['seqno'],
+                         drctn=stgs['drctn'], msg_prty=stgs['msg_prty'], dlvt_mnty=stgs['dlvt_mnty'], 
+                         obs=stgs['obs'], inp_time=stgs['inp_time'], out_date=stgs['out_date'],
+                         out_time=stgs['out_time'], mir=stgs['mir'], f113=stgs['f113'],
+                         mur=stgs['mur'], chk=stgs['chk'])
     else:
         mt940_50.gen_mt9(active_f, mt, target_f)
 
