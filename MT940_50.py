@@ -11,16 +11,30 @@
 #-------------------------------------------------------------------------------
 # Written for Python 3
 
-import csv, datetime
+import csv, datetime, os
 
 
-def gen_mt9(active_file, msg_type, target_file, dtf='DDMMYYYY',
-            appid='A', servid='21', session_no='0000', seqno='000000', # Basic Header Block
-            drctn='I', msg_prty='N', dlvt_mnty='', obs='', inp_time='0000', # Application Header Block
-            out_date='010101', out_time='1200', mir=True, # Application Header Block
-            f113=False, mur='MT940950GEN', # User Header Block
-            chk=False
-            ):
+def gen_mt9(active_file,
+            msg_type='950',
+            target_file, dtf='DDMMYYYY',
+            # Basic Header Block
+            appid='A',
+            servid='21',
+            session_no='0000',
+            seqno='000000',
+            # Application Header Block
+            drctn='I',
+            msg_prty='N',
+            dlvt_mnty='',
+            obs='',
+            inp_time='0000',
+            out_date='010101',
+            out_time='1200',
+            mir=True,
+            # User Header Block
+            f113=False,
+            mur='MT940950GEN',
+            chk=False):
     '''
     CSV --> MT940/50
 
@@ -65,6 +79,8 @@ def gen_mt9(active_file, msg_type, target_file, dtf='DDMMYYYY',
     {5: Trailer Block ---------------------------------------------
     chk         : The checksum for the message.
     '''
+    if not os.path.isfile(active_file):
+        return False
 
     with open(active_file,'r') as afile, open(target_file, 'a') as zfile:
         # Keep track of the last lines details, so that we know when to close the statement or message.
@@ -95,61 +111,100 @@ def gen_mt9(active_file, msg_type, target_file, dtf='DDMMYYYY',
                 continue
             # Invalid column count should raise an error.
             elif len(line) != 27:
-                raise Exception('Bad column count ' + str(line.count(',')) + ' : ' + str(line))
+                raise Exception('Bad column count %s : %s' % (str(line.count(',')), str(line)))
 
             line = convert_values(line, dtf)
 
             # Check to see whether a previous page should be closed.
-            if (prev_line['stmtpg'] != line[4] or prev_line['account'] != line[2]) and prev_line['account'] != '':
+            if (prev_line['stmtpg'] != line[4] or prev_line['account'] != line[2]) and
+                prev_line['account'] != '':
                 # Close the page: ":62F:D151015EUR1618033889"
-                zline = ':62' + prev_line['cbaltyp'] + ':' + prev_line['cbalsgn'] + prev_line['cbaldte'] +\
-                        prev_line['ccy'] + prev_line['cbal'] + '\n'
+                zline = ':62%s:%s%s%s%s\n' % (prev_line['cbaltyp'],
+                                              prev_line['cbalsgn'],
+                                              prev_line['cbaldte'],
+                                              prev_line['ccy'],
+                                              prev_line['cbal'])
 
                 if prev_line['abalsgn'] != '':
                     # Write available balance line: ":64:C151015EUR4238,05"
-                    zline += ':64:' + prev_line['abalsgn'] + prev_line['abaldte'] + prev_line['ccy'] + prev_line['abal'] + '\n'
+                    zline += ':64:%s%s%s%s\n' % (prev_line['abalsgn'],
+                                                 prev_line['abaldte'],
+                                                 prev_line['ccy'],
+                                                 prev_line['abal'])
 
             # Check to see whether it's a new message.
             if prev_line['sendbic'] != line[0].upper() or prev_line['recvbic'] != line[1].upper():
                 if prev_line['sendbic'] != '':# Close the last message
                     # Try and get the checksum of the message, and if successful add the CHK field and reset the file.
                     if chk:
-                        zline += '-}{5:{CHK:' + chk + '}}\n'
+                        zline += '-}{5:{CHK:%s}}\n' % chk
                     else:
                         zline += '-}{5:}\n'
                 # Open the next message
                 # Create Basic Header
-                zline += '{1:' + appid + servid + line[0].ljust(12, 'X') + session_no + seqno + '}'
+                zline += '{1:%s%s%s%s%s}' % (appid,
+                                             servid,
+                                             line[0].ljust(12, 'X'),
+                                             session_no,
+                                             seqno)
 
                 # Create Application Header
                 if drctn == 'I': # Inward (From Swift)
-                    zline += '{2:I' + msg_type + line[1].ljust(12, 'X') + msg_prty + dlvt_mnty + obs + '}'
+                    zline += '{2:I%s%s%s%s%s}' % (msg_type,
+                                                  line[1].ljust(12, 'X'),
+                                                  msg_prty,
+                                                  dlvt_mnty,
+                                                  obs)
                 else: # Outward (To Swift)
                     if mir is True:
                         # Auto generate mir
-                        mir = str(datetime.datetime.today()).replace('-', '')[2:8] + line[0].ljust(12, 'X') + session_no + seqno
-                    zline += '{2:O' + msg_type + inp_time + mir + out_date + out_time + msg_prty + '}'
-
-                f113_ = '' if f113 is False else '{113:'+str(f113).rjust(4, '0') + '}' # Create field 113 if present
-                zline += '{3:' + f113_ + '{118:' + mur + '}{4:\n'
+                        mir = (str(datetime.datetime.today()).replace('-', '')[2:8] +
+                              line[0].ljust(12, 'X') +
+                              session_no +
+                              seqno)
+                    # Add the block
+                    zline += '{2:O%s%s%s%s%s%s}' % (msg_type,
+                                                    inp_time,
+                                                    mir,
+                                                    out_date,
+                                                    out_time,
+                                                    msg_prty)
+                # Create field 113 if present
+                f113_ = '' if f113 is False else '{113:%s}' % str(f113).rjust(4, '0')
+                zline += '{3:%s{118:%s}{4:\n' % (f113, mur)
 
             # Check to see whether a new page should be opened.
             if prev_line['stmtpg'] != line[4] or prev_line['account'] != line[2]:
+                # Add the TRN
                 if line[26] == '' or line[26].isspace():
-                    zline += ':20:MT94050GEN' + str(trn).rjust(6,'0') + '\n'
+                    zline += ':20:MT94050GEN%s\n' % str(trn).rjust(6,'0')
                     trn += 1
                 else:
-                    zline += ':20:' + line[26] + '\n'
-
-                zline += ':25:' + line[2] + '\n' + ':28C:' + line[3].rjust(5, '0') + '/' + line[4].rjust(5, '0') + '\n'
-                zline += ':60' + line[6] + ':' + line[5] + line[7] + line[24] + line[8] + '\n'
+                    zline += ':20:%s\n' % line[26]
+                # Add the Account number and Statement/Page numbers
+                zline += ':25:%s\n%s:28C:%s/%s\n' % (line[2],
+                                                     line[3].rjust(5, '0'),
+                                                     line[4].rjust(5, '0'))
+                # Add the opening balance
+                zline += ':60%s:%s%s%s%s\n' % (line[6],
+                                               line[5],
+                                               line[7],
+                                               line[24],
+                                               line[8])
             # Now add the item line.
-            zline += ':61:' + line[9] + line[10] + line[11] + line[12] + line[13] + line[14] + '//' + line[15] + '\n'
+            zline += ':61:%s%s%s%s%s%s//%s\n' % (line[9],
+                                                 line[10],
+                                                 line[11],
+                                                 line[12],
+                                                 line[13],
+                                                 line[14],
+                                                 line[15])
 
             if line[16] and not line[16].isspace():
-                zline += line[16] + '\n'
-            if msg_type == '940' and line[25] and not line[25].isspace():
-                zline += ':86:' + line[25] + '\n'
+                zline += '%s\n' % line[16]
+            if msg_type == '940' and line[25] and not line[25].isspace()
+                # Add Ref4 for valid 940 items
+                zline += ':86:%s\n' % line[25]
 
             zfile.write(zline)
 
@@ -168,13 +223,19 @@ def gen_mt9(active_file, msg_type, target_file, dtf='DDMMYYYY',
             prev_line['abal']    = line[23]
             lst_line = line
         # Close the last line.
-        zline = ':62F:' + lst_line[17] + lst_line[19] + lst_line[24] + lst_line[20] + '\n'
+        zline = ':62F:%s%s%s%s\n' % (lst_line[17],
+                                     lst_line[19],
+                                     lst_line[24],
+                                     lst_line[20])
 
         if lst_line[21] != '':
             # Write available balance line: ":64:C151015EUR4238,05"
-            zline += ':64:' + lst_line[21] + lst_line[22] + lst_line[24] + lst_line[23] + '\n'
+            zline += ':64:%s%s%s%s\n' % (lst_line[21],
+                                         lst_line[22],
+                                         lst_line[24],
+                                         lst_line[23])
         if chk:
-            zline += '-}{5:{CHK:' + chk + '}}'
+            zline += '-}{5:{CHK:%s}}' % chk
         else:
             zline += '-}{5:}'
 
