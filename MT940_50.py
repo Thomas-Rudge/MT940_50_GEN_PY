@@ -182,9 +182,9 @@ def gen_mt9(active_file,
                 else:
                     zline += ':20:%s\n' % line[26]
                 # Add the Account number and Statement/Page numbers
-                zline += ':25:%s\n%s:28C:%s/%s\n' % (line[2],
-                                                     line[3].rjust(5, '0'),
-                                                     line[4].rjust(5, '0'))
+                zline += ':25:%s\n:28C:%s/%s\n' % (line[2],
+                                                   line[3].rjust(5, '0'),
+                                                   line[4].rjust(5, '0'))
                 # Add the opening balance
                 zline += ':60%s:%s%s%s%s\n' % (line[6],
                                                line[5],
